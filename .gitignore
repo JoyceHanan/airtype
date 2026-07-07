@@ -1,0 +1,143 @@
+# ==============================================================================
+# AirType Project Root Gitignore Config
+# Covers Node.js (Client/Server), Python (ML Service/Experiments), and Data/Models
+# ==============================================================================
+
+# OS / System Files
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Node.js (Client and Server)
+# ------------------------------------------------------------------------------
+node_modules/
+jspm_packages/
+.npm
+.eslintcache
+.stylelintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.docusaurus/
+.next/
+.nuxt/
+dist/
+build/
+.cache/
+
+# Python (ML Service, Tools, & Experiments)
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+parts/
+sdist/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+.pytest_cache/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+
+# Environment Config / Secrets
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+config/*.local.json
+config/secrets.json
+
+# Local Runtime Directories
+# ------------------------------------------------------------------------------
+logs/*
+!logs/.gitkeep
+
+# Data & Labeled Datasets (Ignore heavy recording sessions/numpy matrices)
+# ------------------------------------------------------------------------------
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Heavy dataset files (general formats)
+*.mp4
+*.webm
+*.avi
+*.mov
+*.mkv
+*.npy
+*.npz
+*.h5
+*.he5
+*.csv
+*.tsv
+*.parquet
+*.jsonl
+
+# Models & Weights (Ignore raw binaries; registry file is tracked)
+# ------------------------------------------------------------------------------
+models/*
+!models/registry.json
+!models/.gitkeep
+
+*.pkl
+*.pickle
+*.joblib
+*.pb
+*.onnx
+*.tflite
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.weights
+*.h5
+
+# IDEs and Editors
+# ------------------------------------------------------------------------------
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo

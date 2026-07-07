@@ -1,0 +1,2 @@
+# Placeholder to preserve the empty logs/ directory in git.
+# Application runtime log files (.log) go here and are gitignored.

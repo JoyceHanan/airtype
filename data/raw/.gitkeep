@@ -1,0 +1,2 @@
+# Placeholder to preserve the empty data/raw directory in git.
+# Raw webcam capture sessions (video, raw coordinates) go here but are gitignored.

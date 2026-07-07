@@ -1,0 +1,2 @@
+# Placeholder to preserve the empty data/processed directory in git.
+# Normalized/labeled landmark datasets (JSON, NumPy matrices) go here but are gitignored.

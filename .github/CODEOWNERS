@@ -1,0 +1,25 @@
+# ==============================================================================
+# AirType Code Owners Configuration
+# Automatically assigns reviewers based on file paths
+# ==============================================================================
+
+# Global Maintainers
+*                                      @airtype-devs/core-maintainers
+
+# Core Client Application (React/TypeScript)
+/client/                               @airtype-devs/frontend-team
+
+# Gateway Layer (Node.js/Express)
+/server/                               @airtype-devs/backend-team
+
+# Core ML Service & Python Microservice
+/ml-service/                           @airtype-devs/ml-team
+
+# Research, Datasets, and Classifiers
+/data/                                 @airtype-devs/data-scientists
+/models/                               @airtype-devs/ml-team
+/experiments/                          @airtype-devs/ml-team
+
+# Architectural & central documentation
+/docs/                                 @airtype-devs/core-maintainers
+/docs/adrs/                            @airtype-devs/core-maintainers

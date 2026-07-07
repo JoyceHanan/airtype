@@ -1,0 +1,2 @@
+# Placeholder to preserve the empty models directory in git.
+# Model weight binaries go here but are gitignored. Models are cataloged in registry.json.

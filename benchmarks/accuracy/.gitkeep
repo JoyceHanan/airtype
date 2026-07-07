@@ -1,0 +1,2 @@
+# Placeholder to preserve benchmarks/accuracy directory.
+# Scripts validating tap accuracy (true positives, false positives, false negatives) on golden datasets belong here.
