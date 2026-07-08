@@ -61,6 +61,14 @@ airtype/
 
 ---
 
+## Current Progress
+
+- **[x] Lesson 1: Computer Vision Basics**: Completed foundations covering coordinate grids, BGR-vs-RGB representations, and ecosystem libraries.
+- **[x] Lesson 2: Camera Pipeline Foundation**: Implemented a modular, context-managed `CameraManager` and execution loop to stream real-time webcam video frames.
+- **Next Milestone**: Hand Detection with Google MediaPipe (`Lesson 3`).
+
+---
+
 ## Getting Started
 
 ### Prerequisites
