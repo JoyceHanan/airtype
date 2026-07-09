@@ -3,6 +3,8 @@ import sys
 import cv2
 
 from src.camera.camera_manager import CameraManager
+from src.vision.hand_tracker import HandTracker
+from src.vision.landmark_drawer import LandmarkDrawer
 
 # Initialize logging configuration
 logging.basicConfig(
@@ -14,59 +16,74 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    """Orchestrates the lifecycle of the AirType camera pipeline.
+    """Orchestrates the AirType real-time camera tracking pipeline.
 
-    Main entry point that opens the camera stream using `CameraManager`, runs
-    the frame processing loop, renders the output, and listens for the escape
-    sequence to exit the application cleanly.
+    Links the video capture flow from `CameraManager`, extracts hand features
+    via `HandTracker`, passes tracking coordinates to `LandmarkDrawer` for
+    visualization overlays, and renders the feed.
     """
-    logger.info("Starting AirType Camera Pipeline...")
+    logger.info("Starting AirType Camera & Vision Tracking Pipeline...")
 
-    # Display configuration
-    window_name = "AirType - Camera Feed"
+    # Display configurations
+    window_name = "AirType - Hand Tracking"
     exit_key = "q"
 
-    # Define camera configurations (e.g. target 640x480 resolution)
+    # Hardware configs
     camera_id = 0
     target_width = 640
     target_height = 480
 
+    # Instantiate the drawer helper
+    drawer = LandmarkDrawer()
+
     try:
-        # Use the CameraManager context manager to ensure deterministic cleanup
+        # Context managers guarantee correct cleanup on unexpected execution failure
         with CameraManager(
             camera_id=camera_id, width=target_width, height=target_height
-        ) as camera:
+        ) as camera, HandTracker(
+            static_image_mode=False,
+            max_num_hands=1,
+            min_detection_confidence=0.7,
+            min_tracking_confidence=0.7,
+        ) as tracker:
+
             logger.info(f"Press '{exit_key}' in the video window to quit.")
 
             while True:
-                # Retrieve the latest frame from the webcam
+                # 1. Capture the latest camera image frame
                 success, frame = camera.read_frame()
                 if not success or frame is None:
                     logger.error("Failed to capture frame. Exiting loop.")
                     break
 
-                # Render the webcam feed frame to the screen
+                # 2. Extract hand joints from the image
+                landmarks = tracker.process_frame(frame)
+
+                # 3. Draw overlay if a hand is visible in the frame
+                if landmarks is not None:
+                    frame = drawer.draw(frame, landmarks)
+
+                # 4. Render window display
                 cv2.imshow(window_name, frame)
 
-                # Wait for 1 millisecond and check for the escape key ('q')
-                # 0xFF mask isolates the keycode on various platform configurations
+                # 5. Intercept exit signals
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord(exit_key):
                     logger.info("Exit key pressed by user. Shutting down...")
                     break
 
     except RuntimeError as err:
-        logger.critical(f"Camera Initialization Error: {err}")
+        logger.critical(f"Pipeline Initialization Failure: {err}")
         sys.exit(1)
     except KeyboardInterrupt:
         logger.info("Application interrupted via keyboard. Initiating exit...")
     except Exception as ex:
-        logger.critical(f"Unexpected application failure: {ex}", exc_info=True)
+        logger.critical(f"Unexpected pipeline failure: {ex}", exc_info=True)
         sys.exit(1)
     finally:
-        # OpenCV window destruction is managed here in the application context
+        # Ensure window cleanups are covered under all scopes
         cv2.destroyAllWindows()
-        logger.info("AirType Camera Pipeline shut down cleanly.")
+        logger.info("AirType Tracking Pipeline shut down cleanly.")
 
 
 if __name__ == "__main__":

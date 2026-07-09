@@ -65,7 +65,8 @@ airtype/
 
 - **[x] Lesson 1: Computer Vision Basics**: Completed foundations covering coordinate grids, BGR-vs-RGB representations, and ecosystem libraries.
 - **[x] Lesson 2: Camera Pipeline Foundation**: Implemented a modular, context-managed `CameraManager` and execution loop to stream real-time webcam video frames.
-- **Next Milestone**: Hand Detection with Google MediaPipe (`Lesson 3`).
+- **[x] Lesson 3: MediaPipe Hand Tracking**: Integrated Google MediaPipe Hands tracking to extract 21 3D coordinates and overlay them onto the video feed in real time.
+- **Next Milestone**: Tap Detection & Gesture State Heuristics (`Lesson 4`).
 
 ---
 
