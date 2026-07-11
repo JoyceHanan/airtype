@@ -44,10 +44,16 @@ class LandmarkDrawer:
         self.fingertip_radius = 7
         self.wrist_radius = 8
 
-        # Target pointer visual styles
-        self.target_outer_color = (0, 255, 255)      # Bright Neon Yellow/Green (BGR)
+        # Motion smoothing visualizers
+        self.raw_pointer_color = (147, 20, 255)      # Raw index fingertip (Vivid Coral Pink)
+        self.raw_pointer_radius = 4
+
+        self.target_outer_color = (255, 255, 0)      # Smoothed target ring (Neon Cyan)
         self.target_outer_radius = 16
         self.target_outer_thickness = 2
+        
+        self.offset_line_color = (180, 105, 255)     # Visualizing lag vector offset (BGR)
+        self.offset_line_thickness = 1
 
         # Text overlay configurations
         self.text_color = (255, 255, 255)            # White text
@@ -67,7 +73,7 @@ class LandmarkDrawer:
         Args:
             frame: A BGR OpenCV image matrix.
             landmarks: A list of 21 tracked `Landmark` data points.
-            fingertip_data: Optional processed fingertip coordinates to overlay.
+            fingertip_data: Optional processed raw/smoothed fingertip coordinates to overlay.
 
         Returns:
             The modified BGR image frame with overlays rendered.
@@ -111,34 +117,63 @@ class LandmarkDrawer:
 
             cv2.circle(frame, pt, radius, color, cv2.FILLED, lineType=cv2.LINE_AA)
 
-        # Step 4: Draw custom tracker pointer and coordinates overlay if fingertip data exists
+        # Step 4: Draw custom tracker pointer, lag vectors, and coordinates overlay
         if fingertip_data is not None:
-            px_x, px_y = fingertip_data.pixel_coords
+            raw_x, raw_y = fingertip_data.pixel_coords
+            smooth_x, smooth_y = fingertip_data.smoothed_pixel_coords
 
-            # Draw a distinct concentric ring around the target fingertip (landmark 8)
+            # Draw a line connecting raw and smoothed points (visual representation of filter offset)
+            cv2.line(
+                frame,
+                (raw_x, raw_y),
+                (smooth_x, smooth_y),
+                self.offset_line_color,
+                self.offset_line_thickness,
+                lineType=cv2.LINE_AA,
+            )
+
+            # Draw a small indicator circle on the raw tracking position
             cv2.circle(
                 frame,
-                (px_x, px_y),
+                (raw_x, raw_y),
+                self.raw_pointer_radius,
+                self.raw_pointer_color,
+                cv2.FILLED,
+                lineType=cv2.LINE_AA,
+            )
+
+            # Draw the distinct smoothed pointer (concentric target ring)
+            cv2.circle(
+                frame,
+                (smooth_x, smooth_y),
                 self.target_outer_radius,
                 self.target_outer_color,
                 self.target_outer_thickness,
                 lineType=cv2.LINE_AA,
             )
+            cv2.circle(
+                frame,
+                (smooth_x, smooth_y),
+                3,
+                self.target_outer_color,
+                cv2.FILLED,
+                lineType=cv2.LINE_AA,
+            )
 
-            # Define coordinate label text
-            coord_text = f"Pointer: ({px_x}, {px_y}) Z: {fingertip_data.depth:.2f}"
+            # Define coordinate label text (referenced from the smoothed cursor)
+            coord_text = f"Cursor: ({smooth_x}, {smooth_y}) Z: {fingertip_data.depth:.2f}"
             
-            # Place label slightly offset above and to the right of the fingertip
-            text_x = px_x + 20
-            text_y = px_y - 20
+            # Place label slightly offset above and to the right of the smoothed fingertip
+            text_x = smooth_x + 20
+            text_y = smooth_y - 20
 
             # Prevent text drawing off-screen
             if text_x + 180 > width:
-                text_x = px_x - 200
+                text_x = smooth_x - 200
             if text_y - 15 < 0:
-                text_y = px_y + 30
+                text_y = smooth_y + 30
 
-            # Render text drop shadow (for high contrast readability against bright feeds)
+            # Render text drop shadow
             cv2.putText(
                 frame,
                 coord_text,

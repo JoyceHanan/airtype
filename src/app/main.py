@@ -20,13 +20,13 @@ def main() -> None:
     """Orchestrates the AirType real-time camera tracking pipeline.
 
     Links the video capture flow from `CameraManager`, extracts hand landmarks
-    via `HandTracker`, processes coordinate metrics using `LandmarkProcessor`,
-    renders overlays via `LandmarkDrawer`, and displays the active feed.
+    via `HandTracker`, processes coordinate metrics and filters jitter using
+    `LandmarkProcessor`, renders overlays via `LandmarkDrawer`, and displays the feed.
     """
-    logger.info("Starting AirType Camera, Vision, & Coordinate Processing Pipeline...")
+    logger.info("Starting AirType Camera, Vision, & Coordinate Smoothing Pipeline...")
 
     # Display configurations
-    window_name = "AirType - Fingertip Tracking"
+    window_name = "AirType - Coordinate Smoothing"
     exit_key = "q"
 
     # Hardware configs
@@ -65,7 +65,7 @@ def main() -> None:
                 if landmarks is not None:
                     height, width, _ = frame.shape
                     
-                    # Extract the index fingertip coordinates mapped to pixel space
+                    # Extract the index fingertip coordinates mapped to pixel space and smoothed
                     fingertip_data = processor.extract_fingertip(
                         landmarks=landmarks,
                         frame_width=width,
@@ -78,6 +78,9 @@ def main() -> None:
                         landmarks=landmarks,
                         fingertip_data=fingertip_data,
                     )
+                else:
+                    # Reset internal filter state when tracking is lost
+                    processor.reset_filters()
 
                 # 4. Render window display
                 cv2.imshow(window_name, frame)
