@@ -6,6 +6,8 @@ from src.camera.camera_manager import CameraManager
 from src.vision.hand_tracker import HandTracker
 from src.vision.landmark_drawer import LandmarkDrawer
 from src.vision.landmark_processor import LandmarkProcessor
+from src.keyboard.keyboard_layout import KeyboardLayout
+from src.keyboard.keyboard_renderer import KeyboardRenderer
 
 # Initialize logging configuration
 logging.basicConfig(
@@ -17,16 +19,17 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    """Orchestrates the AirType real-time camera tracking pipeline.
+    """Orchestrates the AirType real-time camera tracking and keyboard pipeline.
 
-    Links the video capture flow from `CameraManager`, extracts hand landmarks
-    via `HandTracker`, processes coordinate metrics and filters jitter using
-    `LandmarkProcessor`, renders overlays via `LandmarkDrawer`, and displays the feed.
+    Links video capture from `CameraManager`, renders a virtual keyboard overlay
+    using `KeyboardLayout` and `KeyboardRenderer`, extracts hand tracking landmarks
+    via `HandTracker`, processes smoothing via `LandmarkProcessor`, overlays sketches
+    via `LandmarkDrawer`, and renders the feed.
     """
-    logger.info("Starting AirType Camera, Vision, & Coordinate Smoothing Pipeline...")
+    logger.info("Starting AirType Keyboard & Vision Pipeline...")
 
     # Display configurations
-    window_name = "AirType - Coordinate Smoothing"
+    window_name = "AirType - Virtual Keyboard"
     exit_key = "q"
 
     # Hardware configs
@@ -34,7 +37,10 @@ def main() -> None:
     target_width = 640
     target_height = 480
 
-    # Instantiate visualizer and analytical processors
+    # Instantiate keyboard configuration and visual drawing managers
+    layout = KeyboardLayout(width=target_width, height=target_height)
+    keyboard_renderer = KeyboardRenderer()
+    
     drawer = LandmarkDrawer()
     processor = LandmarkProcessor()
 
@@ -58,10 +64,13 @@ def main() -> None:
                     logger.error("Failed to capture frame. Exiting loop.")
                     break
 
-                # 2. Extract hand joints from the image
+                # 2. Render virtual keyboard overlays onto raw frame (drawn first)
+                frame = keyboard_renderer.render(frame, layout.get_keys())
+
+                # 3. Extract hand joints from the frame
                 landmarks = tracker.process_frame(frame)
 
-                # 3. If a hand is detected, process fingertip coordinates and overlay visual guides
+                # 4. If hand landmarks are visible, process coordinates and draw tracking indicators on top
                 if landmarks is not None:
                     height, width, _ = frame.shape
                     
@@ -72,7 +81,7 @@ def main() -> None:
                         frame_height=height,
                     )
                     
-                    # Overlay skeleton joints and coordinate HUD labels onto the frame
+                    # Overlay skeleton joints and coordinate HUD labels on top of virtual keyboard
                     frame = drawer.draw(
                         frame=frame,
                         landmarks=landmarks,
@@ -82,10 +91,10 @@ def main() -> None:
                     # Reset internal filter state when tracking is lost
                     processor.reset_filters()
 
-                # 4. Render window display
+                # 5. Render window display
                 cv2.imshow(window_name, frame)
 
-                # 5. Intercept exit signals
+                # 6. Intercept exit signals
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord(exit_key):
                     logger.info("Exit key pressed by user. Shutting down...")
