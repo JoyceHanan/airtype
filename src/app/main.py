@@ -8,6 +8,7 @@ from src.vision.landmark_drawer import LandmarkDrawer
 from src.vision.landmark_processor import LandmarkProcessor
 from src.keyboard.keyboard_layout import KeyboardLayout
 from src.keyboard.keyboard_renderer import KeyboardRenderer
+from src.keyboard.hover_detector import HoverDetector
 
 # Initialize logging configuration
 logging.basicConfig(
@@ -19,17 +20,17 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    """Orchestrates the AirType real-time camera tracking and keyboard pipeline.
+    """Orchestrates the AirType real-time camera tracking, keyboard, and hover pipeline.
 
-    Links video capture from `CameraManager`, renders a virtual keyboard overlay
-    using `KeyboardLayout` and `KeyboardRenderer`, extracts hand tracking landmarks
-    via `HandTracker`, processes smoothing via `LandmarkProcessor`, overlays sketches
-    via `LandmarkDrawer`, and renders the feed.
+    Links video capture from `CameraManager`, processes hand tracking landmarks
+    via `HandTracker`, tracks smoothed fingertip coordinates, checks collision zones
+    via `HoverDetector`, renders overlays via `KeyboardRenderer`, visualizes hands
+    via `LandmarkDrawer`, and displays the active feed.
     """
-    logger.info("Starting AirType Keyboard & Vision Pipeline...")
+    logger.info("Starting AirType Keyboard, Vision, & Hover Processing Pipeline...")
 
     # Display configurations
-    window_name = "AirType - Virtual Keyboard"
+    window_name = "AirType - Hover Detection"
     exit_key = "q"
 
     # Hardware configs
@@ -37,9 +38,10 @@ def main() -> None:
     target_width = 640
     target_height = 480
 
-    # Instantiate keyboard configuration and visual drawing managers
+    # Instantiate keyboard configurations and collision detector
     layout = KeyboardLayout(width=target_width, height=target_height)
     keyboard_renderer = KeyboardRenderer()
+    hover_detector = HoverDetector()
     
     drawer = LandmarkDrawer()
     processor = LandmarkProcessor()
@@ -64,13 +66,13 @@ def main() -> None:
                     logger.error("Failed to capture frame. Exiting loop.")
                     break
 
-                # 2. Render virtual keyboard overlays onto raw frame (drawn first)
-                frame = keyboard_renderer.render(frame, layout.get_keys())
-
-                # 3. Extract hand joints from the frame
+                # 2. Extract hand joints from the frame
                 landmarks = tracker.process_frame(frame)
 
-                # 4. If hand landmarks are visible, process coordinates and draw tracking indicators on top
+                fingertip_data = None
+                hovered_key = None
+
+                # 3. If hand landmarks are visible, process coordinates and calculate hover collisions
                 if landmarks is not None:
                     height, width, _ = frame.shape
                     
@@ -81,20 +83,35 @@ def main() -> None:
                         frame_height=height,
                     )
                     
-                    # Overlay skeleton joints and coordinate HUD labels on top of virtual keyboard
+                    if fingertip_data is not None:
+                        # Determine which key the user is targeting
+                        hovered_key = hover_detector.check_hover(
+                            fingertip_coords=fingertip_data.pixel_coords,
+                            keys=layout.get_keys(),
+                        )
+                else:
+                    # Reset internal filter state when tracking is lost
+                    processor.reset_filters()
+
+                # 4. Render virtual keyboard overlays (highlighting active hover states)
+                frame = keyboard_renderer.render(
+                    frame=frame,
+                    keys=layout.get_keys(),
+                    hovered_key=hovered_key,
+                )
+
+                # 5. Overlay skeleton joints and coordinate HUD labels on top of virtual keyboard
+                if landmarks is not None:
                     frame = drawer.draw(
                         frame=frame,
                         landmarks=landmarks,
                         fingertip_data=fingertip_data,
                     )
-                else:
-                    # Reset internal filter state when tracking is lost
-                    processor.reset_filters()
 
-                # 5. Render window display
+                # 6. Render window display
                 cv2.imshow(window_name, frame)
 
-                # 6. Intercept exit signals
+                # 7. Intercept exit signals
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord(exit_key):
                     logger.info("Exit key pressed by user. Shutting down...")

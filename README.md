@@ -69,7 +69,8 @@ airtype/
 - **[x] Lesson 4: Fingertip Tracking & Coordinate Mapping**: Extracted index fingertip coordinates, implemented normalized-to-pixel space conversions, and added tracking visual pointers.
 - **[x] Lesson 5: Motion Smoothing (EMA)**: Implemented a reusable coordinate filtering interface, added an Exponential Moving Average filter, and added lag vectors comparison overlays.
 - **[x] Lesson 6: Virtual Keyboard Rendering**: Modelled QWERTY layouts and implemented a translucent visual keyboard overlay on the bottom half of the capture stream.
-- **Next Milestone**: Hover and Key Collision detection (`Lesson 7`).
+- **[x] Lesson 7: Hover Detection Using Bounding Box Collision**: Created point-in-rectangle collision hitboxes and added dynamic key highlighted visual feedback overlays.
+- **Next Milestone**: Pinch-to-Tap Gesture Detection & Heuristics (`Lesson 8`).
 
 ---
 
