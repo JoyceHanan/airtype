@@ -9,6 +9,7 @@ from src.vision.landmark_processor import LandmarkProcessor
 from src.keyboard.keyboard_layout import KeyboardLayout
 from src.keyboard.keyboard_renderer import KeyboardRenderer
 from src.keyboard.hover_detector import HoverDetector
+from src.input.tap_detector import TapDetector
 
 # Initialize logging configuration
 logging.basicConfig(
@@ -20,17 +21,17 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    """Orchestrates the AirType real-time camera tracking, keyboard, and hover pipeline.
+    """Orchestrates the AirType real-time camera, tracking, keyboard, and input pipeline.
 
-    Links video capture from `CameraManager`, processes hand tracking landmarks
-    via `HandTracker`, tracks smoothed fingertip coordinates, checks collision zones
-    via `HoverDetector`, renders overlays via `KeyboardRenderer`, visualizes hands
-    via `LandmarkDrawer`, and displays the active feed.
+    Links video capture from `CameraManager`, processes hand landmarks via `HandTracker`,
+    extracts smoothed coordinates via `LandmarkProcessor`, checks key target overlaps
+    via `HoverDetector`, tracks click gestures via `TapDetector`, renders UI layouts
+    via `KeyboardRenderer`, visualizes hands via `LandmarkDrawer`, and displays the feed.
     """
-    logger.info("Starting AirType Keyboard, Vision, & Hover Processing Pipeline...")
+    logger.info("Starting AirType Keyboard, Vision, Hover, & Tap Processing Pipeline...")
 
     # Display configurations
-    window_name = "AirType - Hover Detection"
+    window_name = "AirType - Tap Detection"
     exit_key = "q"
 
     # Hardware configs
@@ -38,10 +39,11 @@ def main() -> None:
     target_width = 640
     target_height = 480
 
-    # Instantiate keyboard configurations and collision detector
+    # Instantiate keyboard, collision, and click detection components
     layout = KeyboardLayout(width=target_width, height=target_height)
     keyboard_renderer = KeyboardRenderer()
     hover_detector = HoverDetector()
+    tap_detector = TapDetector()
     
     drawer = LandmarkDrawer()
     processor = LandmarkProcessor()
@@ -72,7 +74,7 @@ def main() -> None:
                 fingertip_data = None
                 hovered_key = None
 
-                # 3. If hand landmarks are visible, process coordinates and calculate hover collisions
+                # 3. If hand landmarks are visible, process coordinates and calculate hover/tap actions
                 if landmarks is not None:
                     height, width, _ = frame.shape
                     
@@ -89,9 +91,20 @@ def main() -> None:
                             fingertip_coords=fingertip_data.pixel_coords,
                             keys=layout.get_keys(),
                         )
+                        
+                        # Process click detection on Z-depth coordinate
+                        tap_triggered = tap_detector.update(fingertip_data.depth)
+                        
+                        # Emit a print statement only on the exact click transition event
+                        if tap_triggered and hovered_key is not None:
+                            print(
+                                f"[KEYPRESS] Entered key: {hovered_key.label}",
+                                flush=True,
+                            )
                 else:
-                    # Reset internal filter state when tracking is lost
+                    # Reset internal filter and state machine history when tracking is lost
                     processor.reset_filters()
+                    tap_detector.reset()
 
                 # 4. Render virtual keyboard overlays (highlighting active hover states)
                 frame = keyboard_renderer.render(

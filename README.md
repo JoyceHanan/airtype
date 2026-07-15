@@ -70,7 +70,8 @@ airtype/
 - **[x] Lesson 5: Motion Smoothing (EMA)**: Implemented a reusable coordinate filtering interface, added an Exponential Moving Average filter, and added lag vectors comparison overlays.
 - **[x] Lesson 6: Virtual Keyboard Rendering**: Modelled QWERTY layouts and implemented a translucent visual keyboard overlay on the bottom half of the capture stream.
 - **[x] Lesson 7: Hover Detection Using Bounding Box Collision**: Created point-in-rectangle collision hitboxes and added dynamic key highlighted visual feedback overlays.
-- **Next Milestone**: Pinch-to-Tap Gesture Detection & Heuristics (`Lesson 8`).
+- **[x] Lesson 8: Tap Detection with Finite State Machine**: Implemented depth-based tap gesture detection using a Finite State Machine (FSM) and hysteresis debouncing.
+- **Next Milestone**: Real-time Text Input & Typing Engine (`Lesson 9`).
 
 ---
 
