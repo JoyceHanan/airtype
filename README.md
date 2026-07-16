@@ -71,7 +71,8 @@ airtype/
 - **[x] Lesson 6: Virtual Keyboard Rendering**: Modelled QWERTY layouts and implemented a translucent visual keyboard overlay on the bottom half of the capture stream.
 - **[x] Lesson 7: Hover Detection Using Bounding Box Collision**: Created point-in-rectangle collision hitboxes and added dynamic key highlighted visual feedback overlays.
 - **[x] Lesson 8: Tap Detection with Finite State Machine**: Implemented depth-based tap gesture detection using a Finite State Machine (FSM) and hysteresis debouncing.
-- **Next Milestone**: Real-time Text Input & Typing Engine (`Lesson 9`).
+- **[x] Lesson 9: Text Buffer & Input Processing Engine**: Implemented a decoupled input buffer handling Backspaces, Spaces, and Shifts, and rendered a glassmorphic typing display HUD.
+- **Next Milestone**: Real-time Calibration and Calibration Screens (`Lesson 10`).
 
 ---
 
