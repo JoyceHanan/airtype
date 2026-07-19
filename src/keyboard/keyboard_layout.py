@@ -5,14 +5,14 @@ from src.keyboard.key import Key
 class KeyboardLayout:
     """Manages virtual keyboard configurations and generates key geometries.
 
-    Constructs a dynamic QWERTY grid layout scaled relative to screen canvas
+    Constructs a symmetrical QWERTY grid layout scaled relative to screen canvas
     dimensions. Position computations are kept decoupled from visual drawing styles.
     """
 
-    # QWERTY Key Rows definitions
+    # Symmetrical QWERTY Key Rows definitions
     ROW_1 = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"]
-    ROW_2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L"]
-    ROW_3 = ["Z", "X", "C", "V", "B", "N", "M", "Back"]  # Back = Backspace
+    ROW_2 = ["Caps", "A", "S", "D", "F", "G", "H", "J", "K", "L"]
+    ROW_3 = ["Shift", "Z", "X", "C", "V", "B", "N", "M", "Back"]
 
     def __init__(self, width: int = 640, height: int = 480) -> None:
         """Initializes and computes layouts for the virtual keyboard.
@@ -27,7 +27,7 @@ class KeyboardLayout:
         self._generate_qwerty_layout()
 
     def _generate_qwerty_layout(self) -> None:
-        """Calculates grid coordinates and sizes mapping a QWERTY layout.
+        """Calculates grid coordinates and sizes mapping a symmetrical QWERTY layout.
 
         Places keys in the lower 40% of the screen area, leaving the top portion
         clear for hand visual tracking indicator overlays.
@@ -38,10 +38,10 @@ class KeyboardLayout:
         row_height = int(kb_height / 4)
         margin = 4  # Gap between adjacent key boxes
 
-        # Base key width determined by 10 keys across in Row 1
+        # Base key width determined by 10 keys across in Row 1 & Row 2
         base_key_width = int((self.width - (margin * 11)) / 10)
 
-        # Row 1 layout: 10 keys
+        # Row 1 layout: 10 keys (Q to P)
         y1 = kb_y_start
         for i, char in enumerate(self.ROW_1):
             x = margin + i * (base_key_width + margin)
@@ -55,12 +55,10 @@ class KeyboardLayout:
                 )
             )
 
-        # Row 2 layout: 9 keys (horizontally centered)
+        # Row 2 layout: 10 keys ("Caps" + letters A to L)
         y2 = kb_y_start + row_height
-        row2_width = 9 * base_key_width + 8 * margin
-        row2_x_start = int((self.width - row2_width) / 2)
         for i, char in enumerate(self.ROW_2):
-            x = row2_x_start + i * (base_key_width + margin)
+            x = margin + i * (base_key_width + margin)
             self.keys.append(
                 Key(
                     label=char,
@@ -71,17 +69,18 @@ class KeyboardLayout:
                 )
             )
 
-        # Row 3 layout: 7 letters + 1 double-width Backspace key
+        # Row 3 layout: 9 keys ("Shift" + letters Z to M + "Back" Backspace)
+        # Shift is standard width, letters are standard, Backspace is double-width.
+        # Symmetrical total width aligns with Row 1 & Row 2
         y3 = kb_y_start + (2 * row_height)
-        # 7 normal keys + 1 Backspace (2 * base_key_width) + margins
-        row3_width = 9 * base_key_width + 8 * margin
-        row3_x_start = int((self.width - row3_width) / 2)
         for i, char in enumerate(self.ROW_3):
-            x = row3_x_start + i * (base_key_width + margin)
+            x = margin + i * (base_key_width + margin)
             w = base_key_width
-            # Double-width assignment for Backspace
+            
+            # Double-width assignment for Backspace key
             if char == "Back":
                 w = (base_key_width * 2) + margin
+                
             self.keys.append(
                 Key(label=char, x=x, y=y3, width=w, height=row_height - margin)
             )

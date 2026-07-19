@@ -9,6 +9,7 @@ from src.vision.landmark_processor import LandmarkProcessor
 from src.keyboard.keyboard_layout import KeyboardLayout
 from src.keyboard.keyboard_renderer import KeyboardRenderer
 from src.keyboard.hover_detector import HoverDetector
+from src.keyboard.keyboard_controller import KeyboardController
 from src.input.tap_detector import TapDetector
 from src.input.text_buffer import TextBuffer
 
@@ -22,18 +23,18 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    """Orchestrates the AirType real-time camera tracking and typing pipeline.
+    """Orchestrates the AirType real-time camera tracking and keyboard state pipeline.
 
-    Links video capture from `CameraManager`, processes hand tracking landmarks
-    via `HandTracker`, tracks smoothed fingertip coordinates, checks key target overlaps
-    via `HoverDetector`, tracks clicks via `TapDetector`, updates text values inside
-    `TextBuffer`, renders overlays via `KeyboardRenderer`, visualizes hands via
-    `LandmarkDrawer`, and displays the feed.
+    Links video capture from `CameraManager`, processes landmarks via `HandTracker`,
+    extracts smoothed coordinates via `LandmarkProcessor`, checks key target overlaps
+    via `HoverDetector`, tracks clicks via `TapDetector`, handles keyboard state rules
+    via `KeyboardController`, updates text buffers via `TextBuffer`, renders UI overlays
+    via `KeyboardRenderer`, visualizes hands via `LandmarkDrawer`, and displays the feed.
     """
-    logger.info("Starting AirType Keyboard, Vision, Hover, Tap, & Text Pipeline...")
+    logger.info("Starting AirType Keyboard State, Vision, & Input Processing Pipeline...")
 
     # Display configurations
-    window_name = "AirType - Virtual Keyboard Console"
+    window_name = "AirType - Keyboard State Management"
     exit_key = "q"
 
     # Hardware configs
@@ -41,12 +42,14 @@ def main() -> None:
     target_width = 640
     target_height = 480
 
-    # Instantiate keyboard, collision, click, and text buffer layers
+    # Instantiate keyboard configuration, controller, and buffer
     layout = KeyboardLayout(width=target_width, height=target_height)
     keyboard_renderer = KeyboardRenderer()
     hover_detector = HoverDetector()
     tap_detector = TapDetector()
+    
     text_buffer = TextBuffer()
+    keyboard_controller = KeyboardController(text_buffer=text_buffer)
     
     drawer = LandmarkDrawer()
     processor = LandmarkProcessor()
@@ -104,9 +107,9 @@ def main() -> None:
                         # Process click detection on Z-depth coordinate
                         tap_triggered = tap_detector.update(fingertip_data.depth)
                         
-                        # Process keystroke entries into the text buffer on trigger events
+                        # Forward keystroke trigger signals directly to the KeyboardController
                         if tap_triggered and hovered_key is not None:
-                            text_buffer.add_character(hovered_key.label)
+                            keyboard_controller.handle_keypress(hovered_key.label)
                             logger.info(f"Typed text state: '{text_buffer.get_text()}'")
                 else:
                     # Reset internal filter and state machine history when tracking is lost

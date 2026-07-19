@@ -4,61 +4,30 @@ logger = logging.getLogger(__name__)
 
 
 class TextBuffer:
-    """Manages the state of the active text entry buffer.
+    """A pure data store that maintains the typed string state.
 
-    Encapsulates character insertion, special key operations (Backspace, Space,
-    Enter), and capitalization logic. Operates independently of any visual
-    drawing layers or tracking libraries.
+    This class has no knowledge of keyboard layouts, visual UI rendering, or
+    input gesture logic, serving as a clean receiver of text updates.
     """
 
     def __init__(self) -> None:
         """Initializes the TextBuffer with empty contents."""
         self._text = ""
-        self.shift_active = False
 
-    def add_character(self, key_label: str) -> None:
-        """Processes a keystroke label and updates the buffer state.
+    def insert_character(self, char: str) -> None:
+        """Appends a character directly to the text buffer.
 
         Args:
-            key_label: The logical label of the triggered key.
+            char: The character string to append.
         """
-        # 1. Handle special key Backspace
-        if key_label == "Back":
-            if len(self._text) > 0:
-                self._text = self._text[:-1]
-                logger.debug("Backspace triggered. Text buffer updated.")
-            return
+        self._text += char
+        logger.debug(f"Buffer insert: '{char}' -> Current: '{self._text}'")
 
-        # 2. Handle special key Space
-        if key_label == "Space":
-            self._text += " "
-            logger.debug("Space triggered. Text buffer updated.")
-            return
-
-        # 3. Handle special key Shift
-        if key_label == "Shift":
-            self.shift_active = not self.shift_active
-            logger.debug(f"Shift toggled: {self.shift_active}")
-            return
-
-        # 4. Handle special key Enter
-        if key_label == "Enter":
-            self._text += "\n"
-            logger.debug("Enter triggered. Newline appended.")
-            return
-
-        # 5. Handle standard character typing
-        # Layout characters are uppercase by default (e.g. 'A').
-        # Type lowercase unless shift is active.
-        if len(key_label) == 1:
-            char = key_label.upper() if self.shift_active else key_label.lower()
-            self._text += char
-            logger.debug(f"Character '{char}' appended to text buffer.")
-
-            # Auto-reset shift state after typing a single capital letter (mobile style)
-            if self.shift_active:
-                self.shift_active = False
-                logger.debug("Shift state auto-released.")
+    def delete_back(self) -> None:
+        """Deletes the trailing character from the buffer."""
+        if len(self._text) > 0:
+            self._text = self._text[:-1]
+            logger.debug(f"Buffer delete. Current: '{self._text}'")
 
     def get_text(self) -> str:
         """Retrieves the current text stored in the buffer.
@@ -69,7 +38,6 @@ class TextBuffer:
         return self._text
 
     def clear(self) -> None:
-        """Clears the text buffer contents and resets states."""
+        """Clears the text buffer contents."""
         self._text = ""
-        self.shift_active = False
-        logger.info("Text buffer cleared.")
+        logger.info("Buffer cleared.")

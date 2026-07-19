@@ -72,7 +72,8 @@ airtype/
 - **[x] Lesson 7: Hover Detection Using Bounding Box Collision**: Created point-in-rectangle collision hitboxes and added dynamic key highlighted visual feedback overlays.
 - **[x] Lesson 8: Tap Detection with Finite State Machine**: Implemented depth-based tap gesture detection using a Finite State Machine (FSM) and hysteresis debouncing.
 - **[x] Lesson 9: Text Buffer & Input Processing Engine**: Implemented a decoupled input buffer handling Backspaces, Spaces, and Shifts, and rendered a glassmorphic typing display HUD.
-- **Next Milestone**: Real-time Calibration and Calibration Screens (`Lesson 10`).
+- **[x] Lesson 10: Keyboard State Management**: Created KeyboardController tracking Shift (temporary caps) and Caps Lock (persistent caps) states, keeping TextBuffer as a simple data model.
+- **Next Milestone**: Real-time System Calibration and Adaptive Coordinates Mapping (`Lesson 11`).
 
 ---
 
