@@ -9,7 +9,7 @@ AirType is a virtual keyboard system that enables users to type by tapping their
 AirType is designed as a modular distributed application:
 1. **`client` (React / TypeScript)**: Renders the virtual keyboard overlay, displays the webcam feed, overlays tracked hand landmarks, and shows typed text.
 2. **`server` (Node.js / Express)**: Acts as the gateway layer. It manages user sessions, typing history, and proxies coordinates between the client web application and the Python machine learning service.
-3. **`ml-service` (Python)**: Processes video frame coordinates using MediaPipe Hands, runs tap-vs-hover gesture classification models, and drives the typing state machine.
+3. **`ml-service` (Python)**: Processes video frame coordinates using MediaPipe Hands, runs tap-vs-hover gesture classification models, and drives the typing state machine..
 
 ```mermaid
 graph TD
